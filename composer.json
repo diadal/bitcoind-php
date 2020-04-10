@@ -20,6 +20,11 @@
     "autoload-dev": {
         "psr-4": { "Tests\\Diadal\\": "tests/" }
     },
+    "extra": {
+        "branch-alias": {
+            "2.1.1": "2.1.1"
+        }
+    },
     "require": {
         "php": ">=5.4",
         "laminas/laminas-diactoros": "^2.2"
