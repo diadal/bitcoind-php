@@ -1,0 +1,31 @@
+{
+    "name": "diadal/bitcoind-php",
+    "homepage": "https://github.com/diadal/bitcoind-php",
+    "type": "library",
+    "description": "PHP Wrapper for a bitcoind daemon",
+    "keywords": ["bitcoin", "bitcoind", "bitcoins"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Joshua Estes"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/diadal/bitcoind-php/issues",
+        "source": "https://github.com/diadal/bitcoind-php"
+    },
+    "autoload": {
+        "psr-4": { "Diadal\\": "src/" }
+    },
+    "autoload-dev": {
+        "psr-4": { "Tests\\Diadal\\": "tests/" }
+    },
+    "require": {
+        "php": ">=5.4",
+        "laminas/laminas-diactoros": "^2.2"
+    },
+    "config": {
+        "bin-dir": "bin"
+    },
+    "non-feature-branches": ["master"]
+}
