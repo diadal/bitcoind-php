@@ -2,12 +2,12 @@
 /**
  * @author Joshua Estes
  * @copyright 2012-2015 Joshua Estes
- * @license https://github.com/nbobtc/bitcoind-php/blob/2.x/LICENSE MIT
+ * @license https://github.com/diadal/bitcoind-php/blob/2.x/LICENSE MIT
  */
 
-namespace Tests\Nbobtc\Command;
+namespace Tests\Diadal\Command;
 
-use Nbobtc\Command\Command;
+use Diadal\Command\Command;
 
 /**
  */
@@ -29,11 +29,11 @@ class CommandTest extends \PHPUnit_Framework_TestCase
         $this->assertEmpty($command->getParameters());
         $this->assertNull($command->getId());
 
-        $this->assertInstanceOf('Nbobtc\Command\CommandInterface', $command->withMethod($method));
+        $this->assertInstanceOf('Diadal\Command\CommandInterface', $command->withMethod($method));
         $this->assertEquals($method, $command->getMethod());
-        $this->assertInstanceOf('Nbobtc\Command\CommandInterface', $command->withParameters($parameters));
+        $this->assertInstanceOf('Diadal\Command\CommandInterface', $command->withParameters($parameters));
         $this->assertEquals($parameters, $command->getParameters());
-        $this->assertInstanceOf('Nbobtc\Command\CommandInterface', $command->withId($id));
+        $this->assertInstanceOf('Diadal\Command\CommandInterface', $command->withId($id));
         $this->assertEquals($id, $command->getId());
     }
 

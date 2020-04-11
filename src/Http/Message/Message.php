@@ -2,10 +2,10 @@
 /**
  * @author Joshua Estes
  * @copyright 2012-2015 Joshua Estes
- * @license https://github.com/nbobtc/bitcoind-php/blob/2.x/LICENSE MIT
+ * @license https://github.com/diadal/bitcoind-php/blob/2.x/LICENSE MIT
  */
 
-namespace Nbobtc\Http\Message;
+namespace Diadal\Http\Message;
 
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\StreamInterface;

@@ -2,12 +2,12 @@
 /**
  * @author Joshua Estes
  * @copyright 2012-2015 Joshua Estes
- * @license https://github.com/nbobtc/bitcoind-php/blob/2.x/LICENSE MIT
+ * @license https://github.com/diadal/bitcoind-php/blob/2.x/LICENSE MIT
  */
 
-namespace Nbobtc\Http;
+namespace Diadal\Http;
 
-use Nbobtc\Command\CommandInterface;
+use Diadal\Command\CommandInterface;
 
 /**
  * Client used to send commands to bitcoin servers/nodes
@@ -27,7 +27,7 @@ interface ClientInterface
      * an error it will throw an Exception.
      *
      * @since 2.0.0
-     * @params \Nbobtc\Command\CommandInterface $command
+     * @params \Diadal\Command\CommandInterface $command
      * @return \Psr\Http\Message\ResponseInterface
      * @throws \Exception
      */

@@ -2,17 +2,17 @@
 /**
  * @author Joshua Estes
  * @copyright 2012-2015 Joshua Estes
- * @license https://github.com/nbobtc/bitcoind-php/blob/2.x/LICENSE MIT
+ * @license https://github.com/diadal/bitcoind-php/blob/2.x/LICENSE MIT
  */
 
-namespace Nbobtc\Http;
+namespace Diadal\Http;
 
-use Nbobtc\Command\CommandInterface;
-use Nbobtc\Http\Driver\CurlDriver;
-use Nbobtc\Http\Driver\DriverInterface;
+use Diadal\Command\CommandInterface;
+use Diadal\Http\Driver\CurlDriver;
+use Diadal\Http\Driver\DriverInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Zend\Diactoros\Request;
+use Laminas\Diactoros\Request;
 
 /**
  * @since 2.0.0
@@ -30,7 +30,7 @@ class Client implements ClientInterface
     protected $response;
 
     /**
-     * @var \Nbobtc\Http\Driver\DriverInterface
+     * @var \Diadal\Http\Driver\DriverInterface
      */
     protected $driver;
 
@@ -41,7 +41,7 @@ class Client implements ClientInterface
      * commands to.
      *
      * ```php
-     * $client = new \Nbobtc\Http\Client('https://username:password@localhost:18332');
+     * $client = new \Diadal\Http\Client('https://username:password@localhost:18332');
      * ```
      *
      * @since 2.0.0
@@ -61,7 +61,7 @@ class Client implements ClientInterface
      */
     public function sendCommand(CommandInterface $command)
     {        
-        $body = new \Zend\Diactoros\Stream('php://temp', 'w+');
+        $body = new \Laminas\Diactoros\Stream('php://temp', 'w+');
         $body->write(json_encode(
             array(
                 'method' => $command->getMethod(),
@@ -82,7 +82,7 @@ class Client implements ClientInterface
      * Configures the Client to use a specific driver
      *
      * @since 2.0.0
-     * @param \Nbobtc\Http\Driver\DriverInterface $driver
+     * @param \Diadal\Http\Driver\DriverInterface $driver
      * @return self
      */
     public function withDriver(DriverInterface $driver)

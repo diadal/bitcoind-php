@@ -2,13 +2,13 @@
 /**
  * @author Joshua Estes
  * @copyright 2012-2015 Joshua Estes
- * @license https://github.com/nbobtc/bitcoind-php/blob/2.x/LICENSE MIT
+ * @license https://github.com/diadal/bitcoind-php/blob/2.x/LICENSE MIT
  */
 
-namespace Tests\Nbobtc\Http;
+namespace Tests\Diadal\Http;
 
-use Nbobtc\Http\Client;
-use Nbobtc\Command\Command;
+use Diadal\Http\Client;
+use Diadal\Command\Command;
 
 /**
  */
@@ -39,7 +39,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     public function testSendCommand()
     {
         $response = \Mockery::mock('\Psr\Http\Message\ResponseInterface');
-        $driver   = \Mockery::mock('\Nbobtc\Http\Driver\DriverInterface');
+        $driver   = \Mockery::mock('\Diadal\Http\Driver\DriverInterface');
         $driver
             ->shouldReceive('execute')
             ->andReturn($response);

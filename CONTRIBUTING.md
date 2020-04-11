@@ -30,7 +30,7 @@ Consider donating some [16yRSB46xMeWKfWtqcuqSVV7B2eSjkd92D]
 [PSR-2]: http://www.php-fig.org/psr/psr-2/
 [PSR-3]: http://www.php-fig.org/psr/psr-3/
 [PSR-4]: http://www.php-fig.org/psr/psr-4/
-[CodeClimate]: https://codeclimate.com/github/nbobtc/bitcoind-php/issues
-[GitHub Issues]: https://github.com/nbobtc/bitcoind-php/issues
+[CodeClimate]: https://codeclimate.com/github/Diadal/bitcoind-php/issues
+[GitHub Issues]: https://github.com/diadal/bitcoind-php/issues
 [SensioLabs Insight]: https://insight.sensiolabs.com/projects/c7af9182-f53b-4164-820d-46e7499252f3
 [16yRSB46xMeWKfWtqcuqSVV7B2eSjkd92D]: bitcoin://16yRSB46xMeWKfWtqcuqSVV7B2eSjkd92D

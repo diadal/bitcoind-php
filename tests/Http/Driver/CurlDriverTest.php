@@ -2,20 +2,20 @@
 /**
  * @author Thomas Kerin
  * @copyright 2017 Thomas Kerin
- * @license https://github.com/nbobtc/bitcoind-php/blob/2.x/LICENSE MIT
+ * @license https://github.com/diadal/bitcoind-php/blob/2.x/LICENSE MIT
  */
 
-namespace Tests\Nbobtc\Http\Driver;
-use Nbobtc\Http\Driver\CurlDriver;
+namespace Tests\Diadal\Http\Driver;
+use Diadal\Http\Driver\CurlDriver;
 use Psr\Http\Message\ResponseInterface;
-use Zend\Diactoros\Request;
+use Laminas\Diactoros\Request;
 
 /**
  */
 class CurlDriverTest extends \PHPUnit_Framework_TestCase
 {
     public function testExplodesWithTwo() {
-        $body = new \Zend\Diactoros\Stream('php://temp', 'w+');
+        $body = new \Laminas\Diactoros\Stream('php://temp', 'w+');
         $body->write("test");
 
         $request = (new Request("https://google.com"));
