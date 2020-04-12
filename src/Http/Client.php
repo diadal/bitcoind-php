@@ -1,23 +1,29 @@
 <?php
 /**
- * @author Diadal Nigeria Ltd
- * @copyright 2020 Diadal Nigeria Ltd
+ * @author Joshua Estes
+ * @copyright 2012-2015 Joshua Estes
  * @license https://github.com/diadal/bitcoind-php/blob/2.x/LICENSE MIT
  */
 
 namespace Diadal\Http;
 
 use Diadal\Command\CommandInterface;
+use Diadal\Http\Driver\CurlDriver;
+use Diadal\Http\Driver\DriverInterface;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Process;
+use Laminas\Diactoros\Request;
 
 /**
  * @since 2.0.0
  */
 class Client implements ClientInterface
 {
-    
+    /**
+     * @var \Psr\Http\Message\RequestInterface
+     */
+    protected $request;
+
     /**
      * @var \Psr\Http\Message\ResponseInterface
      */
@@ -26,7 +32,7 @@ class Client implements ClientInterface
     /**
      * @var \Diadal\Http\Driver\DriverInterface
      */
-    // protected $driver;
+    protected $driver;
 
     /**
      * Creates a new Client object
@@ -43,9 +49,10 @@ class Client implements ClientInterface
      *
      * @throws \InvalidArgumentException
      */
-    public function __construct()
+    public function __construct($dsn)
     {
-        
+        $this->driver  = new CurlDriver();
+        $this->request = (new Request($dsn))->withHeader('Content-Type', 'application/json');
     }
 
     /**
@@ -54,25 +61,46 @@ class Client implements ClientInterface
      */
     public function sendCommand(CommandInterface $command)
     {        
+        $body = new \Laminas\Diactoros\Stream('php://temp', 'w+');
+        $body->write(json_encode(
+            array(
+                'method' => $command->getMethod(),
+                'params' => $command->getParameters(),
+                'id'     => $command->getId(),
+            )
+        ));
 
-
-      $data =  collect([['bitcoin-cli'], [$command->getMethod()] , $command->getParameters()]);
-      $collapsed = $data->collapse();
-
-       $data = $collapsed->all();
-
-        $process = new Process($data);
-
-        $process->run();
-           if (!$process->isSuccessful()) {
-              $this->response = 445;
-              return $this->response;
-          }
+        $request = $this->request->withBody($body);
         
         /** @var \Psr\Http\Message\ResponseInterface */
-        $this->response = $process->getOutput();
+        $this->response = $this->driver->execute($request);
 
         return $this->response;
+    }
+
+    /**
+     * Configures the Client to use a specific driver
+     *
+     * @since 2.0.0
+     * @param \Diadal\Http\Driver\DriverInterface $driver
+     * @return self
+     */
+    public function withDriver(DriverInterface $driver)
+    {
+        $this->driver = $driver;
+
+        return $this;
+    }
+
+    /**
+     * Return the current Request object
+     *
+     * @since 2.0.0
+     * @return \Psr\Http\Message\RequestInterface
+     */
+    public function getRequest()
+    {
+        return $this->request;
     }
 
     /**
