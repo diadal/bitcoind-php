@@ -1,116 +1,165 @@
 <?php
 /**
- * @author Joshua Estes
- * @copyright 2012-2015 Joshua Estes
+ * @author Diadal Nigeria
+ * @copyright 2020 Diadal Nigeria
  * @license https://github.com/diadal/bitcoind-php/blob/2.x/LICENSE MIT
  */
 
 namespace Diadal\Http;
 
 use Diadal\Command\CommandInterface;
-use Diadal\Http\Driver\CurlDriver;
-use Diadal\Http\Driver\DriverInterface;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
-use Laminas\Diactoros\Request;
+use Cache;
 
 /**
  * @since 2.0.0
  */
-class Client implements ClientInterface
+class Client
 {
-    /**
-     * @var \Psr\Http\Message\RequestInterface
-     */
-    protected $request;
+    private $username;
+    private $password;
+    private $proto;
+    private $dsn;
+    private $CACertificate;
+
+    // Information and debugging
+    public $status;
+    public $error;
+    public $raw_response;
+    public $response;
 
     /**
-     * @var \Psr\Http\Message\ResponseInterface
-     */
-    protected $response;
-
-    /**
-     * @var \Diadal\Http\Driver\DriverInterface
-     */
-    protected $driver;
-
-    /**
-     * Creates a new Client object
-     *
-     * Currently you MUST pass in a DSN so the client knows where to send
-     * commands to.
-     *
-     * ```php
-     * $client = new \Diadal\Http\Client('https://username:password@localhost:18332');
-     * ```
-     *
-     * @since 2.0.0
-     * @param string $dsn Data Source Name
-     *
-     * @throws \InvalidArgumentException
+     * @param string $username
+     * @param string $password
+     * @param string $host
+     * @param int $port
+     * @param string $proto
+     * @param string $url
      */
     public function __construct($dsn)
     {
-        $this->driver  = new CurlDriver();
-        $this->request = (new Request($dsn))->withHeader('Content-Type', 'application/json');
+     
+        $this->dsn = $dsn;
+        $this->proto   = 'http';
+        $this->CACertificate = null;
     }
 
     /**
-     * @since 2.0.0
-     * {@inheritdoc}
+     * @param string|null $certificate
      */
+    public function setSSL($certificate = null)
+    {
+        $this->proto         = 'https'; // force HTTPS
+        $this->CACertificate = $certificate;
+    }
+
     public function sendCommand(CommandInterface $command)
-    {        
-        $body = new \Laminas\Diactoros\Stream('php://temp', 'w+');
-        $body->write(json_encode(
-            array(
-                'method' => $command->getMethod(),
-                'params' => $command->getParameters(),
-                'id'     => $command->getId(),
-            )
+    {
+        $this->status       = null;
+        $this->error        = null;
+        $this->raw_response = null;
+        $this->response     = null;
+
+        // If no parameters are passed, this will be an empty array
+        $params = array_values($command->getParameters());
+
+        // The ID should be unique for each call
+       $xid = Cache::get('bitcoinrpc') ?? 0;
+        $xid++;
+        Cache::forever('bitcoinrpc', $xid);
+        // Build the request, it's ok that params might have any empty array
+        $request = json_encode(array(
+            'method' => $command->getMethod(),
+            'params' => $params,
+            'id'     => $xid
         ));
 
-        $request = $this->request->withBody($body);
-        
-        /** @var \Psr\Http\Message\ResponseInterface */
-        $this->response = $this->driver->execute($request);
+        $curl = curl_init();
 
-        return $this->response;
-    }
+         $options = array(
+          CURLOPT_URL => $this->dsn,
+          CURLOPT_RETURNTRANSFER => true,
+          CURLOPT_ENCODING => "",
+          CURLOPT_MAXREDIRS => 10,
+          CURLOPT_TIMEOUT => 0,
+          CURLOPT_FOLLOWLOCATION => true,
+          CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+          CURLOPT_CUSTOMREQUEST => "POST",
+          CURLOPT_POSTFIELDS => $request,
+          CURLOPT_HTTPHEADER => array(
+            "Content-Type: application/json"
+          ),
+        );
 
-    /**
-     * Configures the Client to use a specific driver
-     *
-     * @since 2.0.0
-     * @param \Diadal\Http\Driver\DriverInterface $driver
-     * @return self
-     */
-    public function withDriver(DriverInterface $driver)
-    {
-        $this->driver = $driver;
+         // curl_setopt_array($curl,$options);
 
-        return $this;
-    }
+        // $response = curl_exec($curl);
 
-    /**
-     * Return the current Request object
-     *
-     * @since 2.0.0
-     * @return \Psr\Http\Message\RequestInterface
-     */
-    public function getRequest()
-    {
-        return $this->request;
-    }
+        // return $response;
 
-    /**
-     * Returns the current Response object
-     *
-     * @since 2.0.0
-     * @return \Psr\Http\Message\ResponseInterface
-     */
-    public function getResponse()
-    {
+        // This prevents users from getting the following warning when open_basedir is set:
+        // Warning: curl_setopt() [function.curl-setopt]:
+        //   CURLOPT_FOLLOWLOCATION cannot be activated when in safe_mode or an open_basedir is set
+        if (ini_get('open_basedir')) {
+            unset($options[CURLOPT_FOLLOWLOCATION]);
+        }
+
+        if ($this->proto == 'https') {
+            // If the CA Certificate was specified we change CURL to look for it
+            if (!empty($this->CACertificate)) {
+                $options[CURLOPT_CAINFO] = $this->CACertificate;
+                $options[CURLOPT_CAPATH] = DIRNAME($this->CACertificate);
+            } else {
+                // If not we need to assume the SSL cannot be verified
+                // so we set this flag to FALSE to allow the connection
+                $options[CURLOPT_SSL_VERIFYPEER] = false;
+            }
+        }
+
+        curl_setopt_array($curl, $options);
+
+        // Execute the request and decode to an array
+        $this->raw_response = curl_exec($curl);
+        $this->response     = json_decode($this->raw_response, true);
+
+        // return $this->response;
+
+        // If the status is not 200, something is wrong
+        $this->status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+        // If there was no error, this will be an empty string
+        $curl_error = curl_error($curl);
+
+        curl_close($curl);
+
+        if (!empty($curl_error)) {
+            $this->error = $curl_error;
+        }
+
+        if ($this->response['error']) {
+            // If bitcoind returned an error, put that in $this->error
+            $this->error = $this->response['error']['message'];
+        } elseif ($this->status != 200) {
+            // If bitcoind didn't return a nice error message, we need to make our own
+            switch ($this->status) {
+                case 400:
+                    $this->error = 'HTTP_BAD_REQUEST';
+                    break;
+                case 401:
+                    $this->error = 'HTTP_UNAUTHORIZED';
+                    break;
+                case 403:
+                    $this->error = 'HTTP_FORBIDDEN';
+                    break;
+                case 404:
+                    $this->error = 'HTTP_NOT_FOUND';
+                    break;
+            }
+        }
+
+        if ($this->error) {
+            return false;
+        }
+
         return $this->response;
     }
 }
